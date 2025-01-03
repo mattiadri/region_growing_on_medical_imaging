@@ -6,7 +6,7 @@ test_folder = "test_data/"
 slice_index = 10
 
 # Train: estimate threshold
-pipeline = 'pipeline_1'  # Choose the pipeline
+pipeline = 'pipeline_2'  # Choose the pipeline
 threshold = estimate_threshold(training_folder, slice_index=slice_index, pipeline=pipeline)
 print(f"Estimated Threshold: {threshold}")
 
