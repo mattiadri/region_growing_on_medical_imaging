@@ -31,7 +31,6 @@ def calculate_iou(region, segmentation):
 def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='pipeline_1', threshold=10, save_figures=False):
     """
     Inspect the steps of the algorithm on a single image.
-
     Args:
         image_path (str): Path to the `.mhd` image file.
         segmentation_path (str): Path to the `.mhd` segmentation file.
@@ -55,22 +54,28 @@ def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='p
 
     # Plot the results
     fig, axes = plt.subplots(1, 5, figsize=(20, 5))
+    
+    # Original Image
     axes[0].imshow(image, cmap='gray')
     axes[0].set_title("Original Image")
     axes[0].axis("off")
 
+    # Filtered Image
     axes[1].imshow(filtered_image, cmap='gray')
     axes[1].set_title("Filtered Image")
     axes[1].axis("off")
 
+    # Region Growing Mask
     axes[2].imshow(mask, cmap='gray')
     axes[2].set_title("Region Growing Mask")
     axes[2].axis("off")
 
+    # Ground Truth
     axes[3].imshow(segmentation, cmap='gray')
     axes[3].set_title("Ground Truth")
     axes[3].axis("off")
 
+    # Overlap (Mask vs GT)
     axes[4].imshow(segmentation, cmap='gray', alpha=0.5)
     axes[4].imshow(mask, cmap='jet', alpha=0.5)
     axes[4].set_title("Overlap (Mask vs GT)")
@@ -82,3 +87,5 @@ def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='p
     # Save figures if requested
     if save_figures:
         fig.savefig("inspection_results.png")
+
+    return mask
