@@ -32,10 +32,11 @@ pip install -r requirements.txt
 
 ## Usage
 
+This will exstimate the threshold on training data
+
 ```python
 python3 main.py
 ```
-This will exstimate the threshold on training data
 
 ## License
 
