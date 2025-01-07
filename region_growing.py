@@ -1,4 +1,7 @@
+import matplotlib.pyplot as plt
 import numpy as np
+from filters import apply_filter_pipeline
+from data_loader import load_images_and_segmentations
 
 def region_growing(image, seed, threshold):
     visited = np.zeros_like(image, dtype=bool)
@@ -25,32 +28,17 @@ def calculate_iou(region, segmentation):
     union = np.logical_or(region, segmentation).sum()
     return intersection / union if union > 0 else 0
 
-import matplotlib.pyplot as plt
-import numpy as np
-from filters import apply_filter_pipeline
-from region_growing import region_growing
-from data_loader import load_images_and_segmentations
+def inspect_algorithm(image_path, segmentation_path, pipeline='pipeline_1', threshold=10, save_figures=False):
+    # Load images
+    image, segmentation = load_images_and_segmentations(image_path, segmentation_path)
 
-def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='pipeline_1', threshold=10, save_figures=False):
-    """
-    Inspect the steps of the algorithm on a single image.
-
-    Args:
-        image_path (str): Path to the `.mhd` image file.
-        segmentation_path (str): Path to the `.mhd` segmentation file.
-        slice_index (int): The index of the slice to process.
-        pipeline (str): The filtering pipeline to use.
-        threshold (float): The threshold for region growing.
-        save_figures (bool): Whether to save the figures as images.
-
-    Returns:
-        None: Displays the plots for inspection.
-    """
-    # Load image and segmentation
-    image, segmentation = load_images_and_segmentations(image_path, segmentation_path, slice_index)
+    # Use the central slice
+    slice_index = image.shape[0] // 2
+    image_slice = image[slice_index]
+    segmentation_slice = segmentation[slice_index]
 
     # Apply filtering pipeline
-    filtered_image = apply_filter_pipeline(image, pipeline)
+    filtered_image = apply_filter_pipeline(image_slice, pipeline)
 
     # Perform region growing
     seed = (filtered_image.shape[0] // 2, filtered_image.shape[1] // 2)
@@ -58,7 +46,7 @@ def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='p
 
     # Plot the results
     fig, axes = plt.subplots(1, 5, figsize=(20, 5))
-    axes[0].imshow(image, cmap='gray')
+    axes[0].imshow(image_slice, cmap='gray')
     axes[0].set_title("Original Image")
     axes[0].axis("off")
 
@@ -70,11 +58,11 @@ def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='p
     axes[2].set_title("Region Growing Mask")
     axes[2].axis("off")
 
-    axes[3].imshow(segmentation, cmap='gray')
+    axes[3].imshow(segmentation_slice, cmap='gray')
     axes[3].set_title("Ground Truth")
     axes[3].axis("off")
 
-    axes[4].imshow(segmentation, cmap='gray', alpha=0.5)
+    axes[4].imshow(segmentation_slice, cmap='gray', alpha=0.5)
     axes[4].imshow(mask, cmap='jet', alpha=0.5)
     axes[4].set_title("Overlap (Mask vs GT)")
     axes[4].axis("off")
@@ -82,6 +70,5 @@ def inspect_algorithm(image_path, segmentation_path, slice_index=10, pipeline='p
     plt.tight_layout()
     plt.show()
 
-    # Save figures if requested
     if save_figures:
         fig.savefig("inspection_results.png")
