@@ -4,6 +4,7 @@ import cv2
 import time
 from region_growing import region_growing_step_by_step
 from PIL import Image, ImageDraw
+import ffmpeg
 
 def generate_continuous_tentacles(
     random_state: int, 
@@ -135,12 +136,36 @@ def generate_video_with_region_growing(
     print(f"Region growing completed after {step_count} steps.")
     print(f"Execution time: {execution_time:.2f} seconds.")
 
+def convert_video_to_gif_ffmpeg(video_filename: str, gif_filename: str):
+    """
+    Converts a video to a GIF using ffmpeg.
+
+    Parameters:
+        video_filename (str): Path to the input video.
+        gif_filename (str): Path to the output GIF.
+    """
+    (
+        ffmpeg
+        .input(video_filename)
+        .output(gif_filename, vf='fps=15', loop=0)
+        .run()
+    )
+    print(f"GIF saved as {gif_filename}")
+
+
+
 if __name__ == "__main__":
+    video_filename = "tentacle_growth_video.mp4"
+    gif_filename = "tentacle_growth.gif"
+    
     generate_video_with_region_growing(
         random_state=42,
-        video_filename="tentacle_growth_video.mp4",
+        video_filename=video_filename,
         img_size=200,
         num_tentacles=50,
         fps=240,  # High FPS for smoother playback
         threshold=20
     )
+    
+    # Convert to GIF
+    convert_video_to_gif_ffmpeg(video_filename, gif_filename)

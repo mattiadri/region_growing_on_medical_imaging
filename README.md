@@ -58,7 +58,8 @@ Here we can see how the pipelines work:
 
 We use this BFS-based (Breadth-First Search) region growing algorithm because it offers a straightforward and efficient way to segment an image into a contiguous region around a seed pixel. By exploring only the connected pixels that satisfy a specified intensity threshold, the method ensures that all similar and neighboring pixels are included while unrelated areas are excluded. The BFS traversal structure naturally handles connectivity and stops once there are no more valid neighbors to explore. Additionally, the algorithm’s time complexity scales linearly with the number of pixels, making it computationally practical for most image sizes.
 
-![Watch the video](tentacle_growth_video.mp4)
+Here how the algorithm works on a random generated fractal structure:
+![Algorithm Animation](tentacle_growth.gif)
 
 ### BFS Explanation
 
