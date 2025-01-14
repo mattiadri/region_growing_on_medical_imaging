@@ -10,10 +10,6 @@ The algorithm applies a thresholding method, which was initially estimated on a 
 
 This challenge aimed to compare interactive and (semi)-automatic segmentation algorithms applied to MRI scans of the prostate. The training set used to estimate the threshold for the Region Growing algorithm can be accessed through the above link.
 
-### Seed Selection
-
-The seed was selected based on the labeled area in the dataset. Since the data included both the image and the segmentation of the prostate, the center of mass of the labeled area was chosen as the seed for the training data. For the test data, even though segmentation might be available, the seed is assumed to be the center of the image to avoid influencing the algorithm.
-
 ### Threshold Estimation
 
 The threshold value used in the Region Growing algorithm was derived from the **training dataset** (50 images) and subsequently validated on a **test set** (30 images). For simplicity and to reduce the size of the problem, a fixed slice in the middle of the scan was chosen. The estimation process ensures that the algorithm performs robustly across different prostate MRI scans.
@@ -26,6 +22,10 @@ Summary of Evaluation Results:
 | pipeline_1    | 0.486     | 0.2228      |
 | pipeline_2    | 0.100     | 0.1886      |
 | pipeline_3    | 0.175     | 0.1171      |
+
+### Seed Selection
+
+The seed was selected based on the labeled area in the dataset. Since the data included both the image and the segmentation of the prostate, the center of mass of the labeled area was chosen as the seed for the training data. For the test data, even though segmentation might be available, the seed is assumed to be the center of the image to avoid influencing the algorithm.
 
 ### Example Output
 
@@ -95,14 +95,13 @@ Below is a simple diagram illustrating BFS on a small tree structure:
 3. *Visit D, E, F*
 
 **Key Points**:
-- A queue is used to process nodes level by level.
-- Each node’s neighbors are checked, and valid unvisited neighbors are added to the queue.
+- A queue is used to process nodes level by level;
+- Each node’s neighbors are checked, and valid unvisited neighbors are added to the queue;
 - The search continues until there are no more nodes in the queue.
 
 **Time Complexity**:
-- The algorithm takes as input an image of size $h * w$, where $h$ is the height and $w$ is the width.
-calculates the absolute difference between each pixel and the seed value. This operation iterates over all pixels in the image, resulting in a complexity of 
-$O(h * w)$.
+- The algorithm takes as input an image of size $h * w$, where $h$ is the height and $w$ is the width. It calculates the absolute difference between each pixel and the seed value. This operation iterates over all pixels in the image, resulting in a complexity of 
+$O(h * w)$;
 - The main part of the algorithm performs a BFS using a queue to visit pixels that satisfy the mask condition, for each pixel $(x, y)$, up to 8 neighbors are evaluated. This contributes a constant cost per pixel. Each pixel is visited at most once, guaranteed by the `visited` array. Therefore, the total number of iterations in the main loop is proportional to the number of pixels in the image.
 
 Here a graph that confirm the theory:
@@ -157,7 +156,7 @@ End Loop
 Return the region
 ```
 
-### Future improvement
+### Future improvements
 * Parallelization on GPU
 * Multi seed/region
 * Select seed manually
@@ -167,7 +166,7 @@ Return the region
 
 ### Installation
 
-To run the algorithm locally, clone this repository and install the required dependencies.
+To run the algorithm locally, clone this repository and install the required dependencies:
 
 ```bash
 git clone <repository-url>
@@ -177,7 +176,7 @@ pip install -r requirements.txt
 
 ### Usage
 
-This will exstimate the threshold on training data
+This will exstimate the threshold on training data:
 
 ```python
 python3 main.py
