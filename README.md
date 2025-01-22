@@ -19,9 +19,9 @@ Summary of Evaluation Results:
 
 | Pipeline      | Threshold | Average IoU |
 |---------------|-----------|-------------|
-| pipeline_1    | 0.486     | 0.2228      |
-| pipeline_2    | 0.100     | 0.1886      |
-| pipeline_3    | 0.175     | 0.1171      |
+| pipeline_1    | 0.44     | 0.25         |
+| pipeline_2    | 0.10     | 0.21         |
+| pipeline_3    | 0.14     | 0.13         |
 
 ### Seed Selection
 
@@ -119,16 +119,20 @@ Start
 Initialize parameters (image, seed, threshold)
    |
    V
-Set the seed point
+Set the seed point (default to center if seed is None)
    |
    V
-Compute the threshold mask
+Initialize region_sum = image[seed_x, seed_y]
+Initialize region_count = 1
    |
    V
-Initialize visited, region, and queue
+Initialize visited[][] to False
+Initialize region[][] to False
+Initialize queue
    |
    V
-Add the seed to the queue and mark it as visited
+Add the seed to the queue
+Mark seed in visited[][] as True
    |
    V
 BFS Loop:
@@ -136,31 +140,35 @@ BFS Loop:
    |
    |-- Dequeue (x, y)
    |
-   |-- If mask[x, y] is true:
-   |     |
-   |     V
-   |  Add (x, y) to the region
-   |     |
-   |     V
-   |  Explore neighbors (8 directions)
-   |     |
-   |     V
-   |  For each unvisited neighbor:
-   |     - Mark as visited
-   |     - Add to the queue
+   |-- Compute current_mean = region_sum / region_count
+   |
+   |-- If abs(image[x, y] - current_mean) <= threshold:
+   |       |
+   |       V
+   |    Add (x, y) to the region
+   |    Update region_sum += image[x, y]
+   |    Update region_count += 1
+   |       |
+   |       V
+   |    Explore neighbors (8 directions)
+   |       |
+   |       V
+   |    For each unvisited neighbor (nx, ny):
+   |       - Mark visited[nx, ny] = True
+   |       - Enqueue (nx, ny)
    |
    V
-End Loop
+End BFS Loop
    |
    V
-Return the region
+Return region
 ```
 
 ### Future improvements
 * Parallelization on GPU
 * Multi seed/region
 * Select seed manually
-* Relative threshold
+* Better criteria for relative threshold o(N * log(N))
 * Post Processing
 * Probablility instead of threshold
 

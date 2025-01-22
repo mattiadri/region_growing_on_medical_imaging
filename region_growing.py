@@ -8,57 +8,59 @@ from collections import deque
 @njit
 def region_growing(image, seed=None, threshold=10):
     """
-    Performs region growing using BFS.
+    Performs region growing using BFS with iterative mean update.
 
     Args:
         image (ndarray): Grayscale image.
         seed (tuple, optional): Seed (x, y). Defaults to the center of the image.
-        threshold (int): Intensity difference threshold.
+        threshold (int): Maximum allowed intensity difference from the current region mean.
 
     Returns:
         ndarray: Boolean array of the grown region.
     """
     h, w = image.shape
-    
+
     # Default seed is the center of the image
     if seed is None:
         seed_x = h // 2
         seed_y = w // 2
     else:
         seed_x, seed_y = seed
-    
-    seed_value = image[seed_x, seed_y]
-    
-    # Precompute which pixels are within threshold
-    mask = np.abs(image - seed_value) <= threshold
-    
+
+    # Initialize region stats
+    region_sum = float(image[seed_x, seed_y])
+    region_count = 1
+
     visited = np.zeros((h, w), dtype=np.bool_)
     region = np.zeros((h, w), dtype=np.bool_)
-    
+
     # Arrays to implement a BFS queue
     queue_x = np.empty(h * w, dtype=np.int32)
     queue_y = np.empty(h * w, dtype=np.int32)
     front, back = 0, 0
-    
+
     # Enqueue seed and mark visited
     visited[seed_x, seed_y] = True
     queue_x[back] = seed_x
     queue_y[back] = seed_y
     back += 1
-    
+
     # 8-connectivity
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1),
-                      (-1, -1), (-1, 1), (1, -1), (1, 1)]
-    
+                  (-1, -1), (-1, 1), (1, -1), (1, 1)]
+
     while front < back:
         x = queue_x[front]
         y = queue_y[front]
         front += 1
-        
-        # If within threshold, add to region
-        if mask[x, y]:
+
+        current_mean = region_sum / region_count
+        # Check pixel homogeneity with respect to current region mean
+        if abs(image[x, y] - current_mean) <= threshold:
             region[x, y] = True
-            
+            region_sum += image[x, y]
+            region_count += 1
+
             # Enqueue neighbors
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
@@ -71,61 +73,85 @@ def region_growing(image, seed=None, threshold=10):
                         # Optional safety check:
                         # if back >= h * w:
                         #     break
-    
+
     return region
 
 def region_growing_step_by_step(image, threshold=10, seed=None):
-    """
-    Perform region growing step-by-step using BFS and yield intermediate regions.
+    """Perform adaptive region growing using BFS, yielding intermediate regions.
 
-    Parameters:
+    Args:
         image (ndarray): Grayscale input image.
-        seed (tuple, optional): Starting point for region growing (x, y). Defaults to the center of the image.
-        threshold (int): Intensity difference threshold for region inclusion.
+        threshold (int): Allowed intensity difference from the current mean.
+        seed (tuple, optional): (x, y) starting point. Defaults to image center.
 
     Yields:
-        ndarray: Boolean array of the region at each step.
+        ndarray: Boolean array representing the region at each step.
     """
     h, w = image.shape
 
-    # Default to the center of the image if no seed is provided
+    # If no seed is provided, use image center
     if seed is None:
         seed_x, seed_y = h // 2, w // 2
     else:
         seed_x, seed_y = seed
 
-    seed_value = image[seed_x, seed_y]
+    # Keeps track of whether each pixel was checked
+    visited = np.zeros((h, w), dtype=bool)
+    # Marks which pixels belong to the region
+    region = np.zeros((h, w), dtype=bool)
 
-    # Precompute valid region based on the threshold
-    mask = np.abs(image - seed_value) <= threshold
+    # We track the region's cumulative sum and how many pixels it has
+    region_sum = 0.0
+    region_count = 0
 
-    # Initialize visited and region arrays
-    visited = np.zeros_like(mask, dtype=bool)
-    region = np.zeros_like(mask, dtype=bool)
-    queue = deque([(seed_x, seed_y)])
+    # Initialize BFS
+    queue = deque()
+    queue.append((seed_x, seed_y))
 
     # 8-connectivity directions
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1),
-                      (-1, -1), (-1, 1), (1, -1), (1, 1)]
+                  (-1, -1), (-1, 1), (1, -1), (1, 1)]
 
     while queue:
         x, y = queue.popleft()
 
+        # If already visited, skip
         if visited[x, y]:
             continue
         visited[x, y] = True
 
-        if mask[x, y]:
+        # For the very first pixel, we automatically accept it
+        # and initialize our running mean
+        if region_count == 0:
             region[x, y] = True
-            yield region.copy()  # Yield the current region
+            region_sum += image[x, y]
+            region_count += 1
+            # Yield the region as it is after including this pixel
+            yield region.copy()
 
-            # Enqueue valid neighbors
+            # Enqueue neighbors
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < h and 0 <= ny < w and not visited[nx, ny]:
                     queue.append((nx, ny))
 
-    return region  # Final region after BFS
+        else:
+            current_mean = region_sum / region_count
+
+            # If the new pixel is within threshold of the current mean, accept it
+            if abs(image[x, y] - current_mean) <= threshold:
+                region[x, y] = True
+                region_sum += image[x, y]
+                region_count += 1
+                yield region.copy()
+
+                # Enqueue neighbors
+                for dx, dy in directions:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < h and 0 <= ny < w and not visited[nx, ny]:
+                        queue.append((nx, ny))
+
+    return region
 
 def calculate_iou(region, segmentation):
     """
