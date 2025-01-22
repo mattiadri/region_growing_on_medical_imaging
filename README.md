@@ -19,9 +19,9 @@ Summary of Evaluation Results:
 
 | Pipeline      | Threshold | Average IoU |
 |---------------|-----------|-------------|
-| pipeline_1    | 0.44     | 0.25         |
-| pipeline_2    | 0.10     | 0.21         |
-| pipeline_3    | 0.14     | 0.13         |
+| pipeline_1    | 0.463     | 0.25        |
+| pipeline_2    | 0.107     | 0.22        |
+| pipeline_3    | 0.196     | 0.13        |
 
 ### Seed Selection
 

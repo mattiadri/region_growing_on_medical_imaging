@@ -29,7 +29,7 @@ def estimate_threshold(training_folder, slice_index=10, pipeline='pipeline_1', c
         # Coarse search for threshold
         best_threshold = None
         best_iou = 0
-        coarse_range = np.linspace(0.1, 2, num=coarse_steps)
+        coarse_range = np.linspace(0.01, 2, num=coarse_steps)
         for threshold in coarse_range:
             region = region_growing(filtered_image, seed, threshold)
             iou = calculate_iou(region, segmentation)
@@ -40,7 +40,7 @@ def estimate_threshold(training_folder, slice_index=10, pipeline='pipeline_1', c
         # Refine search around the best threshold
         if best_threshold is not None:
             fine_range = np.linspace(
-                max(0.1, best_threshold - (2 / coarse_steps)),
+                max(0.01, best_threshold - (2 / coarse_steps)),
                 min(2, best_threshold + (2 / coarse_steps)),
                 num=fine_steps
             )
