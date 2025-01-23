@@ -100,7 +100,7 @@ Below is a simple diagram illustrating BFS on a small tree structure:
 - The search continues until there are no more nodes in the queue.
 
 **Time Complexity**:
-- The algorithm takes as input an image of size $h * w$, where $h$ is the height and $w$ is the width. It calculates the absolute difference between each pixel and the seed value. This operation iterates over all pixels in the image, resulting in a complexity of 
+- The algorithm takes as input an image of size $h * w$, where $h$ is the height and $w$ is the width. It calculates the absolute difference between each pixel and the value selected according to the growth criterion. This operation iterates over all pixels in the image, resulting in a complexity of 
 $O(h * w)$;
 - The main part of the algorithm performs a BFS using a queue to visit pixels that satisfy the mask condition, for each pixel $(x, y)$, up to 8 neighbors are evaluated. This contributes a constant cost per pixel. Each pixel is visited at most once, guaranteed by the `visited` array. Therefore, the total number of iterations in the main loop is proportional to the number of pixels in the image.
 
